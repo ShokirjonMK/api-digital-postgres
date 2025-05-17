@@ -1,0 +1,15 @@
+assets/*
+!assets/.gitignore
+protected/runtime/*
+!protected/runtime/.gitignore
+protected/data/*.db
+themes/classic/views/
+vendor/
+config.inc.php
+composer.lock
+.idea/
+api/web/index.php
+storage/uploads
+composer.lock
+storage
+api/config/params.php

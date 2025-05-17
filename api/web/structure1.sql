@@ -1,0 +1,32 @@
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users`  (
+  `id` int(0) NOT NULL AUTO_INCREMENT,
+  `username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `auth_key` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password_reset_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `verification_token` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `access_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `access_token_time` int(0) NULL DEFAULT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `template` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `layout` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `view` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `meta` json NULL,
+  `status` smallint(0) NOT NULL DEFAULT 10,
+  `deleted` tinyint(0) NOT NULL DEFAULT 0,
+  `cacheable` tinyint(0) NOT NULL DEFAULT 0,
+  `searchable` tinyint(0) NOT NULL DEFAULT 0,
+  `created_at` int(0) NOT NULL,
+  `updated_at` int(0) NOT NULL,
+  `created_by` int(0) NULL DEFAULT NULL,
+  `updated_by` int(0) NULL DEFAULT NULL,
+  `is_changed` int(0) NULL DEFAULT 0,
+  `status_n` int(0) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `username`(`username`) USING BTREE,
+  UNIQUE INDEX `user_id_index`(`id`) USING BTREE,
+  UNIQUE INDEX `email`(`email`) USING BTREE,
+  UNIQUE INDEX `password_reset_token`(`password_reset_token`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 15264 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
