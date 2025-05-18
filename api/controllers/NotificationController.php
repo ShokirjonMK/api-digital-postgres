@@ -49,6 +49,77 @@ class NotificationController extends ApiActiveController
     public function actionIndex($lang)
     {
         $current_user_id = current_user_id();
+        $roles = current_user_roles_array(); // ["admin", "student", ...]
+
+        // Oldin ko‘rilgan notification_id lar
+        $notification_user = NotificationUser::find()
+            ->select('notification_id')
+            ->where(['user_id' => $current_user_id]);
+
+        // NotificationRole larni topamiz, lekin role json bo‘lsa ->role @> '["admin"]'
+        $query = NotificationRole::find()
+            ->alias('nr')
+            ->leftJoin('notification n', 'nr.notification_id = n.id')
+            ->where(['n.is_deleted' => 0])
+            ->andWhere(['not in', 'nr.notification_id', $notification_user]);
+
+        // Agar role ustuni JSON bo‘lsa:
+        $or = ['or'];
+        foreach ($roles as $role) {
+            $or[] = new \yii\db\Expression("nr.role::jsonb @> :r", [':r' => json_encode([$role])]);
+        }
+        $query->andWhere($or);
+
+        $notification_role_user = $query->all();
+
+        foreach ($notification_role_user as $nruOne) {
+            // Duplikat tekshiruvi
+            $exists = NotificationUser::find()
+                ->where([
+                    'notification_id' => $nruOne->notification_id,
+                    'user_id' => $current_user_id,
+                    'notification_role_id' => $nruOne->id,
+                ])
+                ->exists();
+
+            if ($exists) {
+                continue;
+            }
+
+            // Tutor check
+            if (_checkRole('student') && current_user_is_this_role($nruOne->created_by, 'tutor')) {
+                $nowStudent = Student::findOne($current_user_id);
+                if (!$nowStudent || $nowStudent->tutor_id != $nruOne->created_by) {
+                    continue;
+                }
+            }
+
+            $notificationUserNew = new NotificationUser([
+                'notification_id' => $nruOne->notification_id,
+                'notification_role_id' => $nruOne->id,
+                'user_id' => $current_user_id,
+                'status' => NotificationUser::STATUS_ACTIVE,
+            ]);
+            $notificationUserNew->save(false);
+        }
+
+        // Foydalanuvchiga tegishli notificationlar
+        $query = NotificationUser::find()->where(['user_id' => $current_user_id]);
+        if (Yii::$app->request->get('all') != 1) {
+            $query->andWhere(['status' => 1]);
+        }
+
+        $query = $this->filterAll($query, new NotificationUser());
+        $query = $this->sort($query);
+        $data = $this->getData($query);
+
+        return $this->response(1, _e('Success'), $data);
+    }
+
+
+    public function actionIndex1($lang)
+    {
+        $current_user_id = current_user_id();
         $model = new NotificationRole();
         $table = 'notification_role';
         $tableUser = 'notification_user';
